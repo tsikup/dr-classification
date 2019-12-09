@@ -1,5 +1,5 @@
 from base.base_data_loader import BaseDataLoader
-from keras.datasets import mnist
+from tensorflow.keras.datasets import mnist
 
 class ConvMnistDataLoader(BaseDataLoader):
     def __init__(self, config):
