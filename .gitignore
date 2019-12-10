@@ -113,3 +113,10 @@ experiments/
 datasets/
 
 .idea/
+
+#################
+#   Tsiknakis   #
+#    ignores    #
+#################
+
+run.sh
