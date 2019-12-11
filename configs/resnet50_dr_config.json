@@ -1,0 +1,29 @@
+{
+    "exp": {
+        "name": "resnet50_dr_classification"
+    },
+    "model": {
+        "loss": "sparse_categorical_crossentropy",
+        "learning_rate": 0.001,
+        "optimizer": "sgd",
+        "resize_shape": [512,512]
+    },
+    "trainer": {
+        "num_epochs": 5,
+        "batch_size": 8,
+        "validation_split": 0.25,
+        "verbose_training": true
+    },
+    "callbacks": {
+        "checkpoint_monitor": "val_loss",
+        "checkpoint_mode": "min",
+        "checkpoint_save_best_only": true,
+        "checkpoint_save_weights_only": true,
+        "checkpoint_verbose": true,
+        "tensorboard_write_graph": true
+    },
+    "dataset": {
+        "train":"/media/tsik/Elements/SeeFar/Datasets/Kaggle/diabetic-retinopathy-detection/all_data/train/grades",
+        "test":"/media/tsik/Elements/SeeFar/Datasets/Kaggle/diabetic-retinopathy-detection/all_data/test/grades"
+    }
+}
