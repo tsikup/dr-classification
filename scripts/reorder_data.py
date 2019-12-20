@@ -5,12 +5,14 @@ from PIL import Image
 import csv
 import os
 import pathlib
+import pandas as pd
+import numpy as np
 
 '''
 Create the subfolders with the given labels from the data frame
 '''
 def create_folders(dataframe, parent_folder):
-    categories = np.unique(dataframe.values)
+    categories = np.unique(dataframe.level)
     for i in categories:
         folder = parent_folder + str(i)
         try:
@@ -26,7 +28,6 @@ def move_files(dataframe, parent_folder, destination_folder):
     try:
         for i, row in dataframe.iterrows():
                 filename = r'{}{}.jpeg'.format(parent_folder, row.image)
-                destination_folder + row.level + ".jpeg"
                 new_filename = r'{}{}/{}.jpeg'.format(destination_folder, str(row.level), str(row.image))
                 if not os.path.exists(new_filename):
                     try:
@@ -43,11 +44,11 @@ def move_files(dataframe, parent_folder, destination_folder):
 
 def main():
     # Define parent folder and folders for training/testing set
-    folder = "~/Datasets/Kaggle_EyePACS/"
-    train_read_folder = folder + 'train/'
-    train_destination_folder = folder + 'train/'
-    test_read_folder = folder + 'test/'
-    test_destination_folder = folder + 'test/'
+    folder = "/media/hdd/tsiknakisn/SeeFar/Kaggle/EyePACS/"
+    train_read_folder = folder + 'train_pre/train/'
+    train_destination_folder = folder + 'all_data/train/'
+    test_read_folder = folder + 'test_pre/test/'
+    test_destination_folder = folder + 'all_data/test/'
 
     # Read CSV file containing the labels for each image
     train_labels_file = folder + 'trainLabels.csv'

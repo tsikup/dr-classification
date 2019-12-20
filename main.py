@@ -4,6 +4,10 @@ from trainers.dr_trainer import DRModelTrainer
 from utils.config import process_config
 from utils.dirs import create_dirs
 from utils.utils import get_args
+from utils.gpus import set_gpus
+
+import tensorflow as tf
+import os
 
 def main():
     # capture the config path from the run arguments
@@ -15,20 +19,27 @@ def main():
         print("missing or invalid arguments")
         exit(0)
 
+    # Set number of gpu instances to be used
+    # set_gpus(config)
+    os.environ["CUDA_VISIBLE_DEVICES"] = "2"
+    
     # create the experiments dirs
-    create_dirs([config.callbacks.tensorboard_log_dir, config.callbacks.checkpoint_dir])
+    # print('Creating directories: {}, {}'.format(config.callbacks.tensorboard_log_dir, config.callbacks.checkpoint_dir))
+    # create_dirs([config.callbacks.tensorboard_log_dir, config.callbacks.checkpoint_dir])
 
-    print('Create the data generator.')
-    data_loader = DRDataLoader(config)
+    print('Physical devices: {}'.format(len(tf.config.experimental.list_physical_devices('GPU'))))
+    print('Logical devices: {}'.format(len(tf.config.experimental.list_logical_devices('GPU'))))
+    # print('Create the data generator.')
+    # data_loader = DRDataLoader(config)
 
-    print('Create the model.')
-    model = DR_ResNet50(config)
+    # print('Create the model.')
+    # model = DR_ResNet50(config)
 
-    print('Create the trainer')
-    trainer = DRModelTrainer(model.model, data_loader.get_train_data(), config)
+    # print('Create the trainer')
+    # trainer = DRModelTrainer(model.model, data_loader.get_train_data(), config)
 
-    print('Start training the model.')
-    trainer.train()
+    # print('Start training the model.')
+    # trainer.train()
 
 
 if __name__ == '__main__':

@@ -23,7 +23,12 @@
         "tensorboard_write_graph": true
     },
     "dataset": {
-        "train":"/media/tsik/Elements/SeeFar/Datasets/Kaggle/diabetic-retinopathy-detection/all_data/train/grades",
-        "test":"/media/tsik/Elements/SeeFar/Datasets/Kaggle/diabetic-retinopathy-detection/all_data/test/grades"
+        "train":"/media/hdd/tsiknakisn/SeeFar/Kaggle/EyePACS/all_data/train/grades",
+        "test":"/media/hdd/tsiknakisn/SeeFar/Kaggle/EyePACS/all_data/test/grades"
+    },
+    "devices":{
+        "gpus":[
+            1
+        ]
     }
 }
