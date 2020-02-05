@@ -1,5 +1,5 @@
 from data_loader.dr_data_loader import DRDataLoader
-from models.dr_classification_models import DR_ResNet50
+from models.dr_classification_models import *
 from trainers.dr_trainer import DRModelTrainer
 from utils.config import process_config
 from utils.dirs import create_dirs
@@ -21,25 +21,27 @@ def main():
 
     # Set number of gpu instances to be used
     # set_gpus(config)
-    os.environ["CUDA_VISIBLE_DEVICES"] = "2"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "3"
     
-    # create the experiments dirs
-    # print('Creating directories: {}, {}'.format(config.callbacks.tensorboard_log_dir, config.callbacks.checkpoint_dir))
-    # create_dirs([config.callbacks.tensorboard_log_dir, config.callbacks.checkpoint_dir])
-
     print('Physical devices: {}'.format(len(tf.config.experimental.list_physical_devices('GPU'))))
     print('Logical devices: {}'.format(len(tf.config.experimental.list_logical_devices('GPU'))))
-    # print('Create the data generator.')
-    # data_loader = DRDataLoader(config)
+    
+    # create the experiments dirs
+    print('Creating directories: {}, {}'.format(config.callbacks.tensorboard_log_dir, config.callbacks.checkpoint_dir))
+    create_dirs([config.callbacks.tensorboard_log_dir, config.callbacks.checkpoint_dir])
 
-    # print('Create the model.')
-    # model = DR_ResNet50(config)
+    print('Create the data generator. Classes 0,1 and 2,3,4 are respectively merged together.')
+    data_loader = DRDataLoader(config)
+    train_data, val_data = data_loader.get_train_data(classes=config.dataset.classes)
 
-    # print('Create the trainer')
-    # trainer = DRModelTrainer(model.model, data_loader.get_train_data(), config)
+    print('Create the model.')
+    model = DR_InceptionV3(config)
 
-    # print('Start training the model.')
-    # trainer.train()
+    print('Create the trainer')
+    trainer = DRModelTrainer(model.model, (train_data, val_data), config, data_loader.get_train_data())
+
+    print('Start training the model.')
+    trainer.train()
 
 
 if __name__ == '__main__':
