@@ -1,6 +1,6 @@
 {
     "exp": {
-        "name": "resnet50_dr_classification"
+        "name": "inception_v3_dr_classification"
     },
     "model": {
         "loss": "sparse_categorical_crossentropy",
@@ -25,7 +25,9 @@
     },
     "dataset": {
         "train":"/media/hdd/tsiknakisn/SeeFar/Kaggle/EyePACS/all_data/train/",
-        "test":"/media/hdd/tsiknakisn/SeeFar/Kaggle/EyePACS/all_data/test/"
+        "test":"/media/hdd/tsiknakisn/SeeFar/Kaggle/EyePACS/all_data/test/",
+        "classes": [0,0,1,1,1],
+        "_classes_comment": "// classes should be None or [int,int,int,int,int], which is list of 5 integers representing how the 4 initial classes will be merged"
     },
     "devices":{
         "gpus":[
