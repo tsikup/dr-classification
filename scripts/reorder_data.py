@@ -40,14 +40,27 @@ def move_files(dataframe, parent_folder, destination_folder):
     except Exception as e:
         print(e)
         exit(0)
+        
+
+def check_files_exist(dataframe, folder):
+    try:
+        for i, row in dataframe.iterrows():
+                filename = r'{}{}/{}.jpeg'.format(folder, row.level, row.image)
+                if not os.path.exists(filename):
+                    print('{} ----------- {} does not exist'.format(filename, row.image))
+                else:
+                    continue
+    except Exception as e:
+        print(e)
+        exit(0)
 
 
 def main():
     # Define parent folder and folders for training/testing set
     folder = "/media/hdd/tsiknakisn/SeeFar/Kaggle/EyePACS/"
-    train_read_folder = folder + 'train_pre/train/'
+    train_read_folder = folder + 'train/'
     train_destination_folder = folder + 'all_data/train/'
-    test_read_folder = folder + 'test_pre/test/'
+    test_read_folder = folder + 'test/'
     test_destination_folder = folder + 'all_data/test/'
 
     # Read CSV file containing the labels for each image
@@ -64,6 +77,9 @@ def main():
     # Move images
     move_files(train_df, train_read_folder, train_destination_folder)
     move_files(test_df, test_read_folder, test_destination_folder)
+
+    check_files_exist(train_df, train_destination_folder)
+    check_files_exist(test_df, test_destination_folder)
 
 
 if __name__ == '__main__':
