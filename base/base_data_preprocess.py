@@ -1,6 +1,6 @@
 class BasePreprocess(object):
-    def __init__(self,data):
-        self.data = data
+    def __init__(self):
+        pass
 
     def preprocess(self):
         #implement data preprocessing
