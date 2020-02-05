@@ -4,7 +4,7 @@ from tensorflow.keras.callbacks import ModelCheckpoint, TensorBoard
 
 
 class DRModelTrainer(BaseTrain):
-    def __init__(self, model, data, config):
+    def __init__(self, model, data, config, original_generator=None):
         super(DRModelTrainer, self).__init__(model, data, config)
         self.train_generator = data[0]
         self.validation_generator = data[1]
@@ -14,6 +14,17 @@ class DRModelTrainer(BaseTrain):
         self.val_loss = []
         self.val_acc = []
         self.init_callbacks()
+        # If custom generator is given (e.g. one which have merged some classes together), then these values should be equal to the original generator's
+        if(original_generator is not None):
+            self.train_samples = original_generator[0].samples
+            self.train_batch_size = original_generator[0].batch_size
+            self.validator_samples = original_generator[1].samples
+            self.validator_batch_size = original_generator[1].batch_size
+        else:
+            self.train_samples = data[0].samples
+            self.train_batch_size = data[0].batch_size
+            self.validator_samples = data[1].samples
+            self.validator_batch_size = data[1].batch_size
 
     def init_callbacks(self):
         self.callbacks.append(
@@ -42,20 +53,15 @@ class DRModelTrainer(BaseTrain):
             self.callbacks.append(experiment.get_keras_callback())
 
     def train(self):
-        history = self.model.fit_generator(
+        history = self.model.fit(
             self.train_generator,
-            steps_per_epoch = self.train_generator.samples//self.train_generator.batch_size,
+            steps_per_epoch = self.train_samples//self.train_batch_size,
             epochs = self.config.trainer.num_epochs,
             verbose = self.config.trainer.verbose_training,
             callbacks = self.callbacks,
             validation_data = self.validation_generator,
-            validation_steps = self.validation_generator.samples//self.validation_generator.batch_size,
+            validation_steps = self.validator_samples//self.validator_batch_size,
             validation_freq = 1,
-            class_weight = None,
-            max_queue_size = 10,
-            workers = 1,
-            use_multiprocessing = False,
-            shuffle = True,
             initial_epoch = 0
         )
         self.loss.extend(history.history['loss'])
