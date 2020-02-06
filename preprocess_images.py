@@ -5,8 +5,9 @@ from pathlib import Path
 import glob
 import os
 import cv2 as cv
-
-import multiprocessing as mp
+from concurrent.futures import ProcessPoolExecutor
+from multiprocessing import cpu_count
+import math
 
 def preprocess_and_write(dest, image_path, class_num):
     # Create KagglePreprocess instance
@@ -20,6 +21,21 @@ def preprocess_and_write(dest, image_path, class_num):
     # save new image
     cv.imwrite(new_image_filepath, new_image)
 
+def chunked_worker(input_tuple):
+    dest = input_tuple[0]
+    img_file_list = input_tuple[1]
+    class_num = input_tuple[2]
+    [preprocess_and_write(dest, img, class_num) for img in img_file_list]
+    return 0
+
+def call_multi_executor(images, write_dir, class_num, max_workers=4):
+    with ProcessPoolExecutor(max_workers=max_workers) as executor:
+        chunksize = int(math.ceil(len(images) / float(max_workers)))
+        for i in range(max_workers):
+            images_chuck = images[(chunksize * i) : (chunksize * (i + 1))]
+            executor_input_tuple = (write_dir, images_chuck, class_num)
+            executor.submit(chunked_worker, executor_input_tuple)
+
 def main():
     # capture the config path from the run arguments
     # then process the json configuration file
@@ -30,40 +46,47 @@ def main():
         print(e)
         print("missing or invalid arguments")
         exit(0)
-        
-    # Configure parallel pool for faster data preprocessing
-    pool = mp.Pool(mp.cpu_count()-2)
     
     # Classes to search (e.g. if there are 5 folders for each class named by the number of the class, then classes = [0,1,2,3,4])
     classes = config.dataset.classes
+    
     # Directory to read training set
     train_dir = config.dataset.train
+    
     # Directory to read testing set
     test_dir = config.dataset.test
+    
     # Directory to write training set
     train_dest = config.dataset.train_dest
     Path(train_dest).mkdir(parents=True, exist_ok=False)
+    
     # Directory to write testing set
     test_dest = config.dataset.test_dest
     Path(test_dest).mkdir(parents=True, exist_ok=False)
     
-    # Iterate through classes
+    # ####################### #
+    # Iterate through classes #
+    # ####################### #
     for class_num in classes:
-        # Preprocess training set
+        # ####################### #
+        # Preprocess training set #
+        # ####################### #
         # Create destination folder for each class
         Path(os.path.join(train_dest,str(class_num))).mkdir(parents=True, exist_ok=False)
         # Determine training images' paths
         train_images = glob.glob(os.path.join(train_dir, str(class_num), '*.jpeg'))
-        # Iterate through the images
-        [pool.apply(preprocess_and_write, args=(train_dest, image_path, class_num)) for image_path in train_images]
+        # Preprocess images on several processors
+        call_multi_executor(train_images, train_dest, class_num, max_workers=4)
             
-        # Preprocess testing set
+        # ###################### #
+        # Preprocess testing set #
+        # ###################### #
         # Create destination folder for each class
         Path(os.path.join(test_dest,str(class_num))).mkdir(parents=True, exist_ok=False)
         # Determine testing images' paths
         test_images = glob.glob(os.path.join(test_dir, str(class_num), '*.jpeg'))
         # Iterate through the images
-        [pool.apply(preprocess_and_write, args=(test_dest, image_path, class_num)) for image_path in test_images]          
+        call_multi_executor(test_images, test_dest, class_num, max_workers=4)
         
 
 if __name__ == '__main__':
