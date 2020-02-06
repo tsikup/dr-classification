@@ -18,7 +18,7 @@ def preprocess_and_write(dest, image_path, class_num):
     # determite new filepath
     new_image_filepath = os.path.join(dest, str(class_num), os.path.basename(image_path))
     # save new image
-    cv.imwrite(new_image_filepath, new_image, [int(cv.IMWRITE_JPEG_QUALITY), 100])
+    cv.imwrite(new_image_filepath, new_image)
 
 def main():
     # capture the config path from the run arguments
@@ -63,9 +63,7 @@ def main():
         # Determine testing images' paths
         test_images = glob.glob(os.path.join(test_dir, str(class_num), '*.jpeg'))
         # Iterate through the images
-        for image_path in test_images:
-            preprocess_and_write(test_dest, image_path, class_num)
-            
+        [pool.apply(preprocess_and_write, args=(test_dest, image_path, class_num)) for image_path in test_images]          
         
 
 if __name__ == '__main__':
