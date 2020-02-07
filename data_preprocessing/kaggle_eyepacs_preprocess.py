@@ -7,11 +7,16 @@ class KagglePreprocess(BasePreprocess):
         super(BasePreprocess, self).__init__()
         
     def clahe(self, img, clipLimit=2.0, gridsize=8):
+        # Converting image to LAB Color model
         lab = cv2.cvtColor(img, cv2.COLOR_BGR2LAB)
+        # Splitting the LAB image to different channels
         lab_planes = cv2.split(lab)
+        # Creating and applying clahe to luminance channel
         clahe = cv2.createCLAHE(clipLimit=clipLimit,tileGridSize=(gridsize,gridsize))
         lab_planes[0] = clahe.apply(lab_planes[0])
+        # Merge planes together
         lab = cv2.merge(lab_planes)
+        # Convert image from LAB color plane to BGR color plane
         img = cv2.cvtColor(lab, cv2.COLOR_LAB2BGR)
         return img
 
