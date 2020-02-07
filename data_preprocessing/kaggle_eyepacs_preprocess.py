@@ -5,6 +5,15 @@ import numpy as np
 class KagglePreprocess(BasePreprocess):
     def __init__(self):
         super(BasePreprocess, self).__init__()
+        
+    def clahe(self, img, clipLimit=2.0, gridsize=8):
+        lab = cv2.cvtColor(img, cv2.COLOR_BGR2LAB)
+        lab_planes = cv2.split(lab)
+        clahe = cv2.createCLAHE(clipLimit=clipLimit,tileGridSize=(gridsize,gridsize))
+        lab_planes[0] = clahe.apply(lab_planes[0])
+        lab = cv2.merge(lab_planes)
+        img = cv2.cvtColor(lab, cv2.COLOR_LAB2BGR)
+        return img
 
     def subtract_gaussian_blur(self, img,b=5):
         gb_img = cv2.GaussianBlur(img, (0, 0), b)
