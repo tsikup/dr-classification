@@ -50,9 +50,12 @@ class KagglePreprocess(BasePreprocess):
         if img is not None:
             img = self.crop_img(img)
             blurred_imgs = np.zeros([img.shape[0],img.shape[1],numOfBlurred], dtype=dtype)
-            for row in range(numOfBlurred):
-                img2 = self.subtract_gaussian_blur(img,(row+1)*5)
-                blurred_imgs[:,:,row] = cv2.cvtColor(img2, cv2.COLOR_BGR2GRAY)
+            if(numOfBlurred>1):
+                for row in range(numOfBlurred):
+                    img2 = self.subtract_gaussian_blur(img,(row+1)*5)
+                    blurred_imgs[:,:,row] = cv2.cvtColor(img2, cv2.COLOR_BGR2GRAY)
+            else:
+                blurred_imgs = self.subtract_gaussian_blur(img,5)
             img = self.make_square(blurred_imgs)
             img = self.remove_outer_circle(img, 0.97, img.shape[0]//2)
             return img
