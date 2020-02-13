@@ -5,5 +5,11 @@
         "classes": [0,1,2,3,4],
         "train_dest":"/media/hdd/tsiknakisn/SeeFar/Kaggle/EyePACS/all_data_preprocessed/train/",
         "test_dest":"/media/hdd/tsiknakisn/SeeFar/Kaggle/EyePACS/all_data_preprocessed/test/"
+    },
+    "preprocessing":{
+        "numOfBlurred":1
+    },
+    "multiprocess":{
+        "workers":8
     }
 }
