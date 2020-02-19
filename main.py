@@ -1,6 +1,7 @@
 from data_loader.dr_data_loader import DRDataLoader
 from models.dr_classification_models import *
 from trainers.dr_trainer import DRModelTrainer
+from testers.dr_tester import DRModelTester
 from utils.config import process_config
 from utils.dirs import create_dirs
 from utils.utils import get_args
@@ -21,28 +22,35 @@ def main():
 
     # Set number of gpu instances to be used
     # set_gpus(config)
-    os.environ["CUDA_VISIBLE_DEVICES"] = "3"
+    os.environ["CUDA_VISIBLE_DEVICES"] = config.devices.gpu.id
     
     print('Physical devices: {}'.format(len(tf.config.experimental.list_physical_devices('GPU'))))
     print('Logical devices: {}'.format(len(tf.config.experimental.list_logical_devices('GPU'))))
     
     # create the experiments dirs
-    print('Creating directories: {}, {}'.format(config.callbacks.tensorboard_log_dir, config.callbacks.checkpoint_dir))
-    create_dirs([config.callbacks.tensorboard_log_dir, config.callbacks.checkpoint_dir])
+    print('Creating directories: {}, {}, {}'.format(config.callbacks.tensorboard_log_dir, config.callbacks.checkpoint_dir, config.results.performance_dir))
+    create_dirs([config.callbacks.tensorboard_log_dir, config.callbacks.checkpoint_dir, config.results.performance_dir])
 
     print('Create the data generator. Classes 0,1 and 2,3,4 are respectively merged together.')
     data_loader = DRDataLoader(config)
     train_data, val_data = data_loader.get_train_data(classes=config.dataset.classes)
+    test_data = data_loader.get_test_data(classes=config.dataset.classes)
 
     print('Create the model.')
     model = DR_InceptionV3(config)
 
-    print('Create the trainer')
-    trainer = DRModelTrainer(model.model, (train_data, val_data), config, data_loader.get_train_data())
+    print('Create the trainer.')
+    trainer = DRModelTrainer(model.model, (train_data, val_data), config, data_loader.get_train_data() if config.dataset.classes else None)
 
     print('Start training the model.')
     trainer.train()
+    
+    print('Create the tester.')
+    tester = DRModelTester(model.model, test_data, config)
 
+    print('Test the model.')
+    tester.test()
+    
 
 if __name__ == '__main__':
     main()
