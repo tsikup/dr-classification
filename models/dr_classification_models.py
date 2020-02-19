@@ -1,4 +1,5 @@
 from base.base_model import BaseModel
+from models.optimizers import Optimizer
 from tensorflow.keras import Model
 from tensorflow.keras.applications import *
 from tensorflow.keras.layers import Input, Dense, GlobalAveragePooling2D, Dropout, Conv2D
@@ -8,8 +9,7 @@ import numpy as np
 class DR_ResNet50(BaseModel):
     def __init__(self, config):
         super(DR_ResNet50, self).__init__(config)
-        self.input_shape = tuple(self.config.model.input_shape)
-        self.output_shape = len(np.unique(self.config.dataset.classes)) if self.config.dataset.classes else 5
+        self.optimizer = Optimizer(config)
         self.build_model()
 
     def build_model(self):
@@ -52,7 +52,7 @@ class DR_ResNet50(BaseModel):
 
         self.model.compile(
               loss = self.config.model.loss,
-              optimizer = self.config.model.optimizer,
+              optimizer = self.optimizer.get(),
               metrics = ["accuracy"])
         
     def predict(self, x):
@@ -61,8 +61,7 @@ class DR_ResNet50(BaseModel):
 class DR_InceptionV3(BaseModel):
     def __init__(self, config):
         super(DR_InceptionV3, self).__init__(config)
-        self.input_shape = tuple(self.config.model.input_shape)
-        self.output_shape = len(np.unique(self.config.dataset.classes)) if self.config.dataset.classes else 5
+        self.optimizer = Optimizer(config)
         self.build_model()
 
     def build_model(self):
@@ -105,7 +104,7 @@ class DR_InceptionV3(BaseModel):
 
         self.model.compile(
               loss = self.config.model.loss,
-              optimizer = self.config.model.optimizer,
+              optimizer = self.optimizer.get(),
               metrics = ["accuracy"])
         
     def predict(self, x):
