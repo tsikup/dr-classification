@@ -1,6 +1,10 @@
+import numpy as np
+
 class BaseModel(object):
     def __init__(self, config):
         self.config = config
+        self.input_shape = tuple(self.config.model.input_shape)
+        self.output_shape = len(np.unique(self.config.dataset.classes)) if self.config.dataset.classes else 5
         self.model = None
 
     # save function that saves the checkpoint in the path defined in the config file
