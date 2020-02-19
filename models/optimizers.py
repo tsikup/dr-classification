@@ -1,6 +1,6 @@
 import tensorflow as tf
 import warnings
-from base.base_optmizer import BaseOptimizer
+from base.base_optimizer import BaseOptimizer
 
 class Optimizer(BaseOptimizer):
     def __init__(self, config):
