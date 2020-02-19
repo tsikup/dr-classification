@@ -24,7 +24,7 @@ class DRDataLoader(BaseDataLoader):
             directory = self.config.dataset.train,
             target_size = self.config.model.resize_shape,
             batch_size = self.config.trainer.batch_size,
-            class_mode = 'sparse',
+            class_mode = self.config.dataset.class_mode,
             shuffle = True,
             subset = 'training',
             color_mode="rgb")
@@ -33,7 +33,7 @@ class DRDataLoader(BaseDataLoader):
             directory = self.config.dataset.train,
             target_size = self.config.model.resize_shape,
             batch_size = self.config.trainer.batch_size,
-            class_mode = 'sparse',
+            class_mode = self.config.dataset.class_mode,
             shuffle = True,
             subset = 'validation',
             color_mode="rgb")
@@ -42,7 +42,7 @@ class DRDataLoader(BaseDataLoader):
             directory = self.config.dataset.test,
             target_size = self.config.model.resize_shape,
             batch_size = self.config.trainer.batch_size,
-            class_mode = 'sparse',
+            class_mode = self.config.dataset.class_mode,
             shuffle = True,
             color_mode="rgb")
 
@@ -61,10 +61,16 @@ class DRDataLoader(BaseDataLoader):
     # Define generator with new classes
     # For example, if classes=[0,0,1,1,1], the 0,1 DR classes and the 2,3,4 DR classes will be respectively merged together.
     def new_gen(self, generator, classes):
-        if(len(classes) != 4 and all(isinstance(x, int) for x in classes)):
-            classes = np.array(classes)
+        if(len(classes) == 5 and all(isinstance(x, int) for x in classes)):
             for data, labels in generator:
-                labels = classes[labels.astype(int)]
+                try: # Merge Categorical Labels
+                    assert labels.shape[1] == 5 # Ensure that the dimensions of the labels matrix is [None, 5]
+                    assert self.config.dataset.class_mode == "categorical" # Ensure that the class mode is categorical instead of sparse
+                    labels_new = [[1, 0] if np.argmax(label) < classes.index(next(filter(lambda x: x==1, classes))) else [0, 1] for label in labels]
+                    labels = np.asarray(labels_new)
+                except: # Merge Sparse Labels
+                    classes = np.array(classes)
+                    labels = classes[labels.astype(int)]
                 yield data, labels
         else:
             warnings.warn("'classes' must be a list of 5 integers, but yours was a list of size {} and type {}. Returning the original generator".format(len(classes), type(classes)))
