@@ -2,13 +2,14 @@ from base.base_model import BaseModel
 from tensorflow.keras import Model
 from tensorflow.keras.applications import *
 from tensorflow.keras.layers import Input, Dense, GlobalAveragePooling2D, Dropout, Conv2D
-
-import time
+from tensorflow.keras.metrics import *
+import numpy as np
 
 class DR_ResNet50(BaseModel):
     def __init__(self, config):
         super(DR_ResNet50, self).__init__(config)
         self.input_shape = tuple(self.config.model.input_shape)
+        self.output_shape = len(np.unique(self.config.dataset.classes)) if self.config.dataset.classes else 5
         self.build_model()
 
     def build_model(self):
@@ -20,7 +21,7 @@ class DR_ResNet50(BaseModel):
         self.resnet50_base = ResNet50(include_top=False, input_tensor=self.visible, input_shape=self.input_shape, weights='imagenet')
         # (Un)Freeze ResNet50 parameters
         for layer in self.resnet50_base.layers:
-            layer.trainable = True
+            layer.trainable = trainable
         # self.resnet50_base.trainable = True
         
         ### Add custom classifier
@@ -42,7 +43,9 @@ class DR_ResNet50(BaseModel):
         self.hidden_4 = Dense(128, activation='relu')(self.dropout_3)
         self.dropout_4 = Dropout(0.5)(self.hidden_4)
 
-        self.output = Dense(5, activation='softmax')(self.dropout_4)
+        self.output = Dense(self.output_shape, activation='softmax')(self.dropout_4)
+
+        self.model.summary()
 
         # Define model
         self.model = Model(inputs=self.visible, outputs=self.output)
@@ -50,12 +53,16 @@ class DR_ResNet50(BaseModel):
         self.model.compile(
               loss = self.config.model.loss,
               optimizer = self.config.model.optimizer,
-              metrics = ['accuracy'])
+              metrics = ["accuracy"])
+        
+    def predict(self, x):
+        return self.model.predict(x)
 
 class DR_InceptionV3(BaseModel):
     def __init__(self, config):
         super(DR_InceptionV3, self).__init__(config)
         self.input_shape = tuple(self.config.model.input_shape)
+        self.output_shape = len(np.unique(self.config.dataset.classes)) if self.config.dataset.classes else 5
         self.build_model()
 
     def build_model(self):
@@ -89,36 +96,17 @@ class DR_InceptionV3(BaseModel):
         self.hidden_4 = Dense(128, activation='relu')(self.dropout_3)
         self.dropout_4 = Dropout(0.5)(self.hidden_4)
 
-        self.output = Dense(5, activation='softmax')(self.dropout_4)
+        self.output = Dense(self.output_shape, activation='softmax')(self.dropout_4)
 
         # Define model
         self.model = Model(inputs=self.visible, outputs=self.output)
+        
+        self.model.summary()
 
         self.model.compile(
               loss = self.config.model.loss,
               optimizer = self.config.model.optimizer,
-              metrics = ['accuracy'])
-
-
-        # conv_1      =   Conv2D(32, kernel_size=(7,7), strides = 2, padding = 'valid', activation='relu')(visible_0)
-        # maxpool_2   =   MaxPooling2D(pool_size=(2, 2), strides=2)(conv_1)
-        # conv_3      =   Conv2D(32, kernel_size=(3,3), strides = 1, padding = 'same', activation='relu')(maxpool_2)
-        # conv_4      =   Conv2D(32, kernel_size=(3,3), strides = 1, padding = 'same', activation='relu')(conv_3)
-        # maxpool_5   =   MaxPooling2D(pool_size=(2, 2), strides=2)(conv_4)
-        # conv_6      =   Conv2D(64, kernel_size=(3,3), strides = 1, padding = 'same', activation='relu')(maxpool_5)
-        # conv_7      =   Conv2D(64, kernel_size=(3,3), strides = 1, padding = 'same', activation='relu')(conv_6)
-        # maxpool_8   =   MaxPooling2D(pool_size=(2, 2), strides=2)(conv_7)
-        # conv_9      =   Conv2D(128, kernel_size=(3,3), strides = 1, padding = 'same', activation='relu')(maxpool_8)
-        # conv_10     =   Conv2D(128, kernel_size=(3,3), strides = 1, padding = 'same', activation='relu')(conv_9)
-        # conv_11     =   Conv2D(128, kernel_size=(3,3), strides = 1, padding = 'same', activation='relu')(conv_10)
-        # conv_12     =   Conv2D(128, kernel_size=(3,3), strides = 1, padding = 'same', activation='relu')(conv_11)
-        # maxpool_13  =   MaxPooling2D(pool_size=(2, 2), strides=2)(conv_12)
-        # conv_14     =   Conv2D(256, kernel_size=(3,3), strides = 1, padding = 'same', activation='relu')(maxpool_13)
-        # conv_15     =   Conv2D(256, kernel_size=(3,3), strides = 1, padding = 'same', activation='relu')(conv_14)
-        # conv_16     =   Conv2D(256, kernel_size=(3,3), strides = 1, padding = 'same', activation='relu')(conv_15)
-        # conv_17     =   Conv2D(256, kernel_size=(3,3), strides = 1, padding = 'same', activation='relu')(conv_16)
-        # maxpool_18  =   MaxPooling2D(pool_size=(2, 2), strides=2)(conv_17)
-        # dropout_19  =   Dropout(rate = 0.5)(maxpool_18)
-        # maxout_20   =   MaxoutDense(output_dim=512)(dropout_19)
-        # dropout_21  =   Dropout(rate = 0.5)(maxout_20)
-        # maxout_22   =   MaxoutDense(output_dim=512)
+              metrics = ["accuracy"])
+        
+    def predict(self, x):
+        return self.model.predict(x)
