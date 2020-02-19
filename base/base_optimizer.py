@@ -1,3 +1,5 @@
+import tensorflow as tf
+
 class BaseOptimizer(object):
     def __init__(self, config):
         self.config = config
