@@ -30,9 +30,9 @@ class Optimizer(BaseOptimizer):
         
     def get(self):
         try:
-            self.optimizer = self.optimizers[name](learning_rate=self.lr_schedule if self.lr_schedule else self.config.model.learning_rate)
+            self.optimizer = self.optimizers[self.optimizer_name](learning_rate=self.lr_schedule if self.lr_schedule else self.config.model.learning_rate)
         except KeyError:
-            warnings.warn("KeyError, {} optimizer not found. Falling back to Adam (default)".format(name))
+            warnings.warn("KeyError, {} optimizer not found. Falling back to Adam (default)".format(self.optimizer_name))
             self.optimizer = self.optimizers['adam'](learning_rate=self.lr_schedule if self.lr_schedule else self.config.model.learning_rate)
         finally:
             return self.optimizer
