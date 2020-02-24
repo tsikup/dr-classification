@@ -1,7 +1,7 @@
 from base.base_tester import BaseTester
+from metrics.metrics import ConfusionMatrix
 import os
 from tensorflow.keras.callbacks import ModelCheckpoint, TensorBoard
-from sklearn.metrics import confusion_matrix
 import numpy as np
 
 class DRModelTester(BaseTester):
@@ -11,9 +11,11 @@ class DRModelTester(BaseTester):
     def test(self):
         predictions = np.asarray([], dtype=int)
         ground_truth = np.asarray([], dtype=int)
-        for x, y in self.data:
+        for iteration, data in enumerate(self.data):
+            x, y = data
             predictions = np.append(predictions, np.argmax(self.model.predict(x), axis=-1))
             ground_truth = np.append(ground_truth, np.argmax(y, axis=-1))
-        con_matrix = confusion_matrix(ground_truth, predictions)
-        print('Confusion Matrix: {}'.format(con_matrix))
-        np.save(os.path.join(self.config.results.performance_dir, 'confusion_matrix.npy'), con_matrix)
+        # Calculate and save confusion matrix and other metrics
+        metrics = ConfusionMatrix(ground_truth, predictions, self.config) # Create object's instance
+        metrics.pprint() # Print metrics
+        metrics.save() # Save extended metrics
