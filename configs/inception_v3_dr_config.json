@@ -2,6 +2,11 @@
     "exp": {
         "name": "inception_v3_dr_classification"
     },
+    "mode": "eval",
+    "mode_comment": "'eval' or 'train'",
+    "tester": {
+        "checkpoint_path": "experiments/inception_v3_dr_classification/checkpoints/2020-02-19-17-05/inception_v3_dr_classification-11-0.35.hdf5"
+    },
     "model": {
         "loss": "categorical_crossentropy",
         "learning_rate": 0.0001,
