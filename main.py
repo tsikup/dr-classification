@@ -20,7 +20,7 @@ def train(config):
     test_data = data_loader.get_test_data(classes=config.dataset.classes)
 
     print('Create the model.')
-    model = DR_InceptionV3(config)
+    model = DR_PreTrainedModel(config)
 
     print('Create the trainer.')
     trainer = DRModelTrainer(model.model, (train_data, val_data), config, data_loader.get_train_data() if config.dataset.classes else None)

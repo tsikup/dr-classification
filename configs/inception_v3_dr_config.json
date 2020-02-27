@@ -2,12 +2,14 @@
     "exp": {
         "name": "inception_v3_dr_classification"
     },
-    "mode": "eval",
+    "mode": "train",
     "mode_comment": "'eval' or 'train'",
     "tester": {
-        "checkpoint_path": "experiments/inception_v3_dr_classification/checkpoints/2020-02-19-17-05/inception_v3_dr_classification-11-0.35.hdf5"
+        "checkpoint_path": "experiments/inception_v3_dr_classification/checkpoints/2020-02-25-16-59/inception_v3_dr_classification-18-0.26.hdf5"
     },
     "model": {
+        "backbone": "inception_resnet",
+        "classifier": "zhang",
         "loss": "categorical_crossentropy",
         "learning_rate": 0.0001,
         "optimizer": "adam",
@@ -18,7 +20,7 @@
     "trainer": {
         "num_epochs": 20,
         "batch_size": 8,
-        "validation_split": 0.25,
+        "validation_split": 0.1,
         "verbose_training": 1
     },
     "callbacks": {
@@ -30,8 +32,8 @@
         "tensorboard_write_graph": true
     },
     "dataset": {
-        "train":"/media/hdd/tsiknakisn/SeeFar/Kaggle/EyePACS/all_data_preprocessed/train/",
-        "test":"/media/hdd/tsiknakisn/SeeFar/Kaggle/EyePACS/all_data_preprocessed/test/",
+        "train":"/media/hdd/tsiknakisn/SeeFar/Kaggle/EyePACS/all_data_preprocessed_3_blurred/train/",
+        "test":"/media/hdd/tsiknakisn/SeeFar/Kaggle/EyePACS/all_data_preprocessed_3_blurred/test/",
         "class_mode": "categorical",
         "classes": [0,0,1,1,1],
         "_classes_comment": "// classes should be None or [int,int,int,int,int], which is list of 5 integers representing how the 4 initial classes will be merged"

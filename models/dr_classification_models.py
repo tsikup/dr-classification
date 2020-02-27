@@ -6,9 +6,25 @@ from tensorflow.keras.layers import Input, Dense, GlobalAveragePooling2D, Dropou
 from tensorflow.keras.metrics import *
 import numpy as np
 
+def DR_PreTrainedModel(config):
+    backbones = {
+        "inception": DR_InceptionV3,
+        "resnet": DR_ResNet50,
+        "inception_resnet": DR_InceptionResNetV2
+    }
+    classifiers = {
+        "zhang": ZhangClassifier
+    }
+    model = backbones[config.model.backbone](config, classifiers[config.model.classifier])
+    return model
+
+# ################# #
+# Backbone networks #
+# ################# #
 class DR_ResNet50(BaseModel):
-    def __init__(self, config):
+    def __init__(self, config, classifier):
         super(DR_ResNet50, self).__init__(config)
+        self.classifier = classifier
         self.optimizer = Optimizer(config)
         self.build_model()
 
@@ -18,37 +34,18 @@ class DR_ResNet50(BaseModel):
 
         # ResNet50 as backbone network
         # Load pre-trained ResNet50 without the classifier
-        self.resnet50_base = ResNet50(include_top=False, input_tensor=self.visible, input_shape=self.input_shape, weights='imagenet')
+        self.backbone = ResNet50(include_top=False, input_tensor=self.visible, input_shape=self.input_shape, weights='imagenet')
         # (Un)Freeze ResNet50 parameters
-        for layer in self.resnet50_base.layers:
+        for layer in self.backbone.layers:
             layer.trainable = trainable
-        # self.resnet50_base.trainable = True
+        # self.backbone.trainable = True
         
-        ### Add custom classifier
-        ## W. Zhang, J. Zhong, S. Yang, Z. Gao, J. Hu, Y. Chen and Z. Yi, 
-        ## "Automated identification and grading system of diabetic retinopathy using deep neural networks," 
-        ## Knowledge-Based Systems, vol. 175, pp. 12-25, 1 7 2019.
-        # GAP
-        self.average_pooling = GlobalAveragePooling2D()(self.resnet50_base.output)
-        # Block 1
-        self.hidden_1 = Dense(1024, activation='relu')(self.average_pooling)
-        self.dropout_1 = Dropout(0.25)(self.hidden_1)
-        # Block 2
-        self.hidden_2 = Dense(512, activation='relu')(self.dropout_1)
-        self.dropout_2 = Dropout(0.5)(self.hidden_2)
-        # Block 3
-        self.hidden_3 = Dense(256, activation='relu')(self.dropout_2)
-        self.dropout_3 = Dropout(0.5)(self.hidden_3)
-        # Block 4
-        self.hidden_4 = Dense(128, activation='relu')(self.dropout_3)
-        self.dropout_4 = Dropout(0.5)(self.hidden_4)
-
-        self.output = Dense(self.output_shape, activation='softmax')(self.dropout_4)
-
-        self.model.summary()
+        self.output = self.classifier(self)
 
         # Define model
         self.model = Model(inputs=self.visible, outputs=self.output)
+        
+        self.model.summary()
 
         self.model.compile(
               loss = self.config.model.loss,
@@ -59,8 +56,9 @@ class DR_ResNet50(BaseModel):
         return self.model.predict(x)
 
 class DR_InceptionV3(BaseModel):
-    def __init__(self, config):
+    def __init__(self, config, classifier):
         super(DR_InceptionV3, self).__init__(config)
+        self.classifier = classifier
         self.optimizer = Optimizer(config)
         self.build_model()
 
@@ -70,32 +68,13 @@ class DR_InceptionV3(BaseModel):
 
         # InceptionV3 as backbone network
         # Load pre-trained InceptionV3 without the classifier
-        self.inceptionv3_base = InceptionV3(include_top=False, input_tensor=self.visible, input_shape=self.input_shape, weights='imagenet')
+        self.backbone = InceptionV3(include_top=False, input_tensor=self.visible, input_shape=self.input_shape, weights='imagenet')
         # (Un)Freeze InceptionV3 parameters
-        for layer in self.inceptionv3_base.layers:
+        for layer in self.backbone.layers:
             layer.trainable = True
-        # self.inceptionv3_base.trainable = True
+        # self.backbone.trainable = True
         
-        ### Add custom classifier
-        ## W. Zhang, J. Zhong, S. Yang, Z. Gao, J. Hu, Y. Chen and Z. Yi, 
-        ## "Automated identification and grading system of diabetic retinopathy using deep neural networks," 
-        ## Knowledge-Based Systems, vol. 175, pp. 12-25, 1 7 2019.
-        # GAP
-        self.average_pooling = GlobalAveragePooling2D()(self.inceptionv3_base.output)
-        # Block 1
-        self.hidden_1 = Dense(1024, activation='relu')(self.average_pooling)
-        self.dropout_1 = Dropout(0.25)(self.hidden_1)
-        # Block 2
-        self.hidden_2 = Dense(512, activation='relu')(self.dropout_1)
-        self.dropout_2 = Dropout(0.5)(self.hidden_2)
-        # Block 3
-        self.hidden_3 = Dense(256, activation='relu')(self.dropout_2)
-        self.dropout_3 = Dropout(0.5)(self.hidden_3)
-        # Block 4
-        self.hidden_4 = Dense(128, activation='relu')(self.dropout_3)
-        self.dropout_4 = Dropout(0.5)(self.hidden_4)
-
-        self.output = Dense(self.output_shape, activation='softmax')(self.dropout_4)
+        self.output = self.classifier(self)
 
         # Define model
         self.model = Model(inputs=self.visible, outputs=self.output)
@@ -109,3 +88,66 @@ class DR_InceptionV3(BaseModel):
         
     def predict(self, x):
         return self.model.predict(x)
+    
+class DR_InceptionResNetV2(BaseModel):
+    def __init__(self, config, classifier):
+        super(DR_Inception_ResNet_V2, self).__init__(config)
+        self.classifier = classifier
+        self.optimizer = Optimizer(config)
+        self.build_model()
+
+    def build_model(self):
+        # Define input tensor
+        self.visible = Input(shape=self.input_shape)
+
+        # InceptionResNetV2 as backbone network
+        # Load pre-trained InceptionResNetV2 without the classifier
+        self.backbone = InceptionResNetV2(include_top=False, input_tensor=self.visible, input_shape=self.input_shape, weights='imagenet')
+        # (Un)Freeze InceptionResNetV2 parameters
+        for layer in self.backbone.layers:
+            layer.trainable = True
+        # self.backbone.trainable = True
+        
+        self.output = self.classifier(self)
+
+        # Define model
+        self.model = Model(inputs=self.visible, outputs=self.output)
+        
+        self.model.summary()
+
+        self.model.compile(
+              loss = self.config.model.loss,
+              optimizer = self.optimizer.get(),
+              metrics = ["accuracy"])
+        
+    def predict(self, x):
+        return self.model.predict(x)
+    
+# #################################### #
+# Classifiers for pretrained backbones #
+# #################################### #
+def ZhangClassifier(model):
+    ### Custom classifier
+    ## W. Zhang, J. Zhong, S. Yang, Z. Gao, J. Hu, Y. Chen and Z. Yi, 
+    ## "Automated identification and grading system of diabetic retinopathy using deep neural networks," 
+    ## Knowledge-Based Systems, vol. 175, pp. 12-25, 1 7 2019.
+    # GAP
+    model.average_pooling = GlobalAveragePooling2D()(model.backbone.output)
+    # Block 1
+    model.hidden_1 = Dense(1024, activation='relu')(model.average_pooling)
+    model.dropout_1 = Dropout(0.25)(model.hidden_1)
+    # Block 2
+    model.hidden_2 = Dense(512, activation='relu')(model.dropout_1)
+    model.dropout_2 = Dropout(0.5)(model.hidden_2)
+    # Block 3
+    model.hidden_3 = Dense(256, activation='relu')(model.dropout_2)
+    model.dropout_3 = Dropout(0.5)(model.hidden_3)
+    # Block 4
+    model.hidden_4 = Dense(128, activation='relu')(model.dropout_3)
+    model.dropout_4 = Dropout(0.5)(model.hidden_4)
+    # Block 5 (added to test the performance)
+    model.hidden_5 = Dense(64, activation='relu')(model.dropout_4)
+    model.dropout_5 = Dropout(0.5)(model.hidden_5)
+    # Output
+    model.output = Dense(model.output_shape, activation='softmax')(model.dropout_5)
+    return model.output
