@@ -91,7 +91,7 @@ class DR_InceptionV3(BaseModel):
     
 class DR_InceptionResNetV2(BaseModel):
     def __init__(self, config, classifier):
-        super(DR_Inception_ResNet_V2, self).__init__(config)
+        super(DR_InceptionResNetV2, self).__init__(config)
         self.classifier = classifier
         self.optimizer = Optimizer(config)
         self.build_model()
