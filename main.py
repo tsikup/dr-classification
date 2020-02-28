@@ -69,8 +69,8 @@ def main():
     # set_gpus(config)
     os.environ["CUDA_VISIBLE_DEVICES"] = config.devices.gpu.id
     
-    print('Physical devices: {}'.format(len(tf.config.experimental.list_physical_devices('GPU'))))
-    print('Logical devices: {}'.format(len(tf.config.experimental.list_logical_devices('GPU'))))
+    print('Physical GPU devices: {}'.format(len(tf.config.experimental.list_physical_devices('GPU'))))
+    print('Logical GPU devices: {}'.format(len(tf.config.experimental.list_logical_devices('GPU'))))
     
     if(config.mode == "train"):
         train(config)
