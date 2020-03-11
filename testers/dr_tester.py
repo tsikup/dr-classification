@@ -12,6 +12,9 @@ class DRModelTester(BaseTester):
         predictions = np.asarray([], dtype=int)
         ground_truth = np.asarray([], dtype=int)
         for iteration, data in enumerate(self.data):
+            if(iteration>self.config.dataset.batch.test_size):
+                break
+            print('Batch iteration: {}'.format(iteration))
             x, y = data
             predictions = np.append(predictions, np.argmax(self.model.predict(x), axis=-1))
             ground_truth = np.append(ground_truth, np.argmax(y, axis=-1))
