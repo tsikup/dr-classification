@@ -3,8 +3,8 @@
         "train":"/media/hdd/tsiknakisn/SeeFar/Kaggle/EyePACS/all_data/train/",
         "test":"/media/hdd/tsiknakisn/SeeFar/Kaggle/EyePACS/all_data/test/",
         "classes": [0,1,2,3,4],
-        "train_dest":"/media/hdd/tsiknakisn/SeeFar/Kaggle/EyePACS/all_data_preprocessed/train/",
-        "test_dest":"/media/hdd/tsiknakisn/SeeFar/Kaggle/EyePACS/all_data_preprocessed/test/"
+        "train_dest":"/media/hdd/tsiknakisn/SeeFar/Kaggle/EyePACS/all_data_preprocessed_1_blurred/train/",
+        "test_dest":"/media/hdd/tsiknakisn/SeeFar/Kaggle/EyePACS/all_data_preprocessed_1_blurred/test/"
     },
     "preprocessing":{
         "numOfBlurred":1

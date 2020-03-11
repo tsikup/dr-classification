@@ -9,7 +9,7 @@ from concurrent.futures import ProcessPoolExecutor
 from multiprocessing import cpu_count
 import math
 
-def preprocess_and_write(dest, image_path, class_num, numOfBlurred=3):
+def preprocess_and_write(dest, image_path, class_num, numOfBlurred=1):
     # Create KagglePreprocess instance
     kaggle_preprocessor = KagglePreprocess()
     # read image in color mode
@@ -29,7 +29,7 @@ def chunked_worker(input_tuple):
     [preprocess_and_write(dest, img, class_num, numOfBlurred) for img in img_file_list]
     return 0
 
-def call_multi_executor(images, write_dir, class_num, max_workers=4, numOfBlurred=3):
+def call_multi_executor(images, write_dir, class_num, max_workers=4, numOfBlurred=1):
     with ProcessPoolExecutor(max_workers=max_workers) as executor:
         chunksize = int(math.ceil(len(images) / float(max_workers)))
         for i in range(max_workers):
@@ -42,7 +42,7 @@ def main():
     # then process the json configuration file
     try:
         args = get_args()
-        config = process_config(args.config)
+        config = process_config(args.config, False, False)
     except Exception as e:
         print(e)
         print("missing or invalid arguments")
