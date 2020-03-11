@@ -3,7 +3,6 @@ from models.dr_classification_models import *
 from trainers.dr_trainer import DRModelTrainer
 from testers.dr_tester import DRModelTester
 from utils.config import process_config
-from utils.dirs import create_dirs
 from utils.utils import get_args
 from utils.gpus import set_gpus
 
@@ -11,9 +10,6 @@ import tensorflow as tf
 import os
 
 def train(config):
-    print('Creating directories: {}, {}, {}'.format(config.callbacks.tensorboard_log_dir, config.callbacks.checkpoint_dir, config.results.performance_dir))
-    create_dirs([config.callbacks.tensorboard_log_dir, config.callbacks.checkpoint_dir, config.results.performance_dir])
-
     print('Create the data generator. Classes 0,1 and 2,3,4 are respectively merged together.')
     data_loader = DRDataLoader(config)
     train_data, val_data = data_loader.get_train_data(classes=config.dataset.classes)
@@ -23,7 +19,7 @@ def train(config):
     model = DR_PreTrainedModel(config)
 
     print('Create the trainer.')
-    trainer = DRModelTrainer(model.model, (train_data, val_data), config, data_loader.get_train_data() if config.dataset.classes else None)
+    trainer = DRModelTrainer(model.model, (train_data, val_data), config)
 
     print('Start training the model.')
     trainer.train()
@@ -34,16 +30,13 @@ def train(config):
     print('Test the model.')
     tester.test()
     
-def evaluate(config):
-    print('Creating directories: {}'.format(config.results.performance_dir))
-    create_dirs([config.results.performance_dir])
-    
+def evaluate(config):    
     print('Create the data generator. Classes 0,1 and 2,3,4 are respectively merged together.')
     data_loader = DRDataLoader(config)
     test_data = data_loader.get_test_data(classes=config.dataset.classes)
 
     print('Create the model.')
-    model = DR_InceptionV3(config)
+    model = DR_PreTrainedModel(config)
     
     print('Loading checkpoint\'s weights')
     model.load(config.tester.checkpoint_path)
@@ -59,7 +52,7 @@ def main():
     # then process the json configuration file
     try:
         args = get_args()
-        config = process_config(args.config)
+        config = process_config(args.config, dirs=True, config_copy=True)
     except Exception as e:
         print(e)
         print("missing or invalid arguments")
