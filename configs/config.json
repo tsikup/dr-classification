@@ -1,11 +1,11 @@
 {
     "exp": {
-        "name": "inception_v3_dr_classification"
+        "name": "inception_resnet_zhang_1blur_dr_classification"
     },
     "mode": "train",
     "mode_comment": "'eval' or 'train'",
     "tester": {
-        "checkpoint_path": "experiments/inception_v3_dr_classification/checkpoints/2020-02-25-16-59/inception_v3_dr_classification-18-0.26.hdf5"
+        "checkpoint_path": ""
     },
     "model": {
         "backbone": "inception_resnet",
@@ -32,8 +32,8 @@
         "tensorboard_write_graph": true
     },
     "dataset": {
-        "train":"/media/hdd/tsiknakisn/SeeFar/Kaggle/EyePACS/all_data_preprocessed_3_blurred/train/",
-        "test":"/media/hdd/tsiknakisn/SeeFar/Kaggle/EyePACS/all_data_preprocessed_3_blurred/test/",
+        "train":"/media/hdd/tsiknakisn/SeeFar/Kaggle/EyePACS/all_data_preprocessed_1_blurred/train/",
+        "test":"/media/hdd/tsiknakisn/SeeFar/Kaggle/EyePACS/all_data_preprocessed_1_blurred/test/",
         "class_mode": "categorical",
         "classes": [0,0,1,1,1],
         "_classes_comment": "// classes should be None or [int,int,int,int,int], which is list of 5 integers representing how the 4 initial classes will be merged"
@@ -43,7 +43,7 @@
             1
         ],
         "gpu":{
-            "id":"2"
+            "id":"3"
         }
     }
 }
