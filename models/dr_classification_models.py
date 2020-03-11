@@ -10,7 +10,10 @@ def DR_PreTrainedModel(config):
     backbones = {
         "inception": DR_InceptionV3,
         "resnet": DR_ResNet50,
-        "inception_resnet": DR_InceptionResNetV2
+        "inception_resnet": DR_InceptionResNetV2,
+        "xception": DR_Xception,
+        "dense121": DR_DenseNet121,
+        "nasnet": DR_NASNetLarge
     }
     classifiers = {
         "zhang": ZhangClassifier
@@ -37,8 +40,7 @@ class DR_ResNet50(BaseModel):
         self.backbone = ResNet50(include_top=False, input_tensor=self.visible, input_shape=self.input_shape, weights='imagenet')
         # (Un)Freeze ResNet50 parameters
         for layer in self.backbone.layers:
-            layer.trainable = trainable
-        # self.backbone.trainable = True
+            layer.trainable = True
         
         self.output = self.classifier(self)
 
@@ -72,7 +74,6 @@ class DR_InceptionV3(BaseModel):
         # (Un)Freeze InceptionV3 parameters
         for layer in self.backbone.layers:
             layer.trainable = True
-        # self.backbone.trainable = True
         
         self.output = self.classifier(self)
 
@@ -106,7 +107,106 @@ class DR_InceptionResNetV2(BaseModel):
         # (Un)Freeze InceptionResNetV2 parameters
         for layer in self.backbone.layers:
             layer.trainable = True
-        # self.backbone.trainable = True
+        
+        self.output = self.classifier(self)
+
+        # Define model
+        self.model = Model(inputs=self.visible, outputs=self.output)
+        
+        self.model.summary()
+
+        self.model.compile(
+              loss = self.config.model.loss,
+              optimizer = self.optimizer.get(),
+              metrics = ["accuracy"])
+        
+    def predict(self, x):
+        return self.model.predict(x)
+    
+class DR_Xception(BaseModel):
+    def __init__(self, config, classifier):
+        super(DR_Xception, self).__init__(config)
+        self.classifier = classifier
+        self.optimizer = Optimizer(config)
+        self.build_model()
+
+    def build_model(self):
+        # Define input tensor
+        self.visible = Input(shape=self.input_shape)
+
+        # Xception as backbone network
+        # Load pre-trained Xception without the classifier
+        self.backbone = Xception(include_top=False, input_tensor=self.visible, input_shape=self.input_shape, weights='imagenet')
+        # (Un)Freeze Xception parameters
+        for layer in self.backbone.layers:
+            layer.trainable = True
+        
+        self.output = self.classifier(self)
+
+        # Define model
+        self.model = Model(inputs=self.visible, outputs=self.output)
+        
+        self.model.summary()
+
+        self.model.compile(
+              loss = self.config.model.loss,
+              optimizer = self.optimizer.get(),
+              metrics = ["accuracy"])
+        
+    def predict(self, x):
+        return self.model.predict(x)
+    
+
+class DR_DenseNet121(BaseModel):
+    def __init__(self, config, classifier):
+        super(DR_DenseNet121, self).__init__(config)
+        self.classifier = classifier
+        self.optimizer = Optimizer(config)
+        self.build_model()
+
+    def build_model(self):
+        # Define input tensor
+        self.visible = Input(shape=self.input_shape)
+
+        # DenseNet121 as backbone network
+        # Load pre-trained DenseNet121 without the classifier
+        self.backbone = DenseNet121(include_top=False, input_tensor=self.visible, input_shape=self.input_shape, weights='imagenet')
+        # (Un)Freeze DenseNet121 parameters
+        for layer in self.backbone.layers:
+            layer.trainable = True
+        
+        self.output = self.classifier(self)
+
+        # Define model
+        self.model = Model(inputs=self.visible, outputs=self.output)
+        
+        self.model.summary()
+
+        self.model.compile(
+              loss = self.config.model.loss,
+              optimizer = self.optimizer.get(),
+              metrics = ["accuracy"])
+        
+    def predict(self, x):
+        return self.model.predict(x)
+    
+class DR_NASNetLarge(BaseModel):
+    def __init__(self, config, classifier):
+        super(DR_NASNetLarge, self).__init__(config)
+        self.classifier = classifier
+        self.optimizer = Optimizer(config)
+        self.build_model()
+
+    def build_model(self):
+        # Define input tensor
+        self.visible = Input(shape=self.input_shape)
+
+        # NASNetLarge as backbone network
+        # Load pre-trained NASNetLarge without the classifier
+        self.backbone = NASNetLarge(include_top=False, input_tensor=self.visible, input_shape=self.input_shape, weights='imagenet')
+        # (Un)Freeze NASNetLarge parameters
+        for layer in self.backbone.layers:
+            layer.trainable = True
         
         self.output = self.classifier(self)
 
@@ -145,9 +245,6 @@ def ZhangClassifier(model):
     # Block 4
     model.hidden_4 = Dense(128, activation='relu')(model.dropout_3)
     model.dropout_4 = Dropout(0.5)(model.hidden_4)
-    # Block 5 (added to test the performance)
-    model.hidden_5 = Dense(64, activation='relu')(model.dropout_4)
-    model.dropout_5 = Dropout(0.5)(model.hidden_5)
     # Output
-    model.output = Dense(model.output_shape, activation='softmax')(model.dropout_5)
+    model.output = Dense(model.output_shape, activation='softmax')(model.dropout_4)
     return model.output
