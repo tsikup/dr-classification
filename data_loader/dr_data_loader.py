@@ -47,12 +47,15 @@ class DRDataLoader(BaseDataLoader):
             color_mode="rgb")
 
     def get_train_data(self, classes=None):
+        self.config.dataset.batch.train_size = len(self.train_generator)
+        self.config.dataset.batch.val_size = len(self.validation_generator)
         if(classes is not None):
             return self.new_gen(self.train_generator, classes), self.new_gen(self.validation_generator, classes)
         else:
             return self.train_generator, self.validation_generator
 
     def get_test_data(self, classes=None):
+        self.config.dataset.batch.test_size = len(self.test_generator)
         if(classes is not None):
             return self.new_gen(self.test_generator, classes)
         else:
@@ -73,7 +76,7 @@ class DRDataLoader(BaseDataLoader):
                     labels = classes[labels.astype(int)]
                 yield data, labels
         else:
-            warnings.warn("'classes' must be a list of 5 integers, but yours was a list of size {} and type {}. Returning the original generator".format(len(classes), type(classes)))
+            warnings.warn("'classes' must be a list of 5 integers, but yours is a list of size {} and type {}. Returning the original generator".format(len(classes), type(classes)))
             return generator
         
 
